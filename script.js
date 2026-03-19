@@ -211,7 +211,7 @@ function showMainPreview(file) {
             
             // --- APPLY BLUR TO BOTTOM LAYERS ---
             // Matches the value in processSingleImage
-            ctx.filter = 'blur(10px)';
+            ctx.filter = 'blur(5px)';
             
             // Z-Index 1
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
