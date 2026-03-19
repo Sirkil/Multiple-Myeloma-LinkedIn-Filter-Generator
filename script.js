@@ -21,7 +21,7 @@ const downloadSub = document.getElementById('downloadSub');
 let selectedFiles = [];
 let downloadAction = null;
 
-// --- Load Static Layers (Z-index 1 & 4) ---
+// --- Load Static Layers (Z-index 1 & 3) ---
 const backgroundImage = new Image();
 backgroundImage.src = 'Background Layer.jpeg'; // Ensure this matches your folder filename
 
@@ -161,10 +161,8 @@ function processSingleImage(file) {
                 offCanvas.height = 800;
                 const offCtx = offCanvas.getContext('2d');
 
-                // --- APPLY BLUR TO BOTTOM LAYERS ---
-                // Adjust this value to change blur strength
-                offCtx.filter = 'blur(2px)'; 
-
+                // --- THE 3-LAYER STACK ---
+                
                 // Z-Index 1: Background Layer
                 offCtx.drawImage(backgroundImage, 0, 0, offCanvas.width, offCanvas.height);
 
@@ -174,10 +172,7 @@ function processSingleImage(file) {
                 const y = (offCanvas.height / 2) - (userImage.height / 2) * scale;
                 offCtx.drawImage(userImage, x, y, userImage.width * scale, userImage.height * scale);
 
-                // --- REMOVE BLUR FOR THE OVERLAY ---
-                offCtx.filter = 'none';
-
-                // Z-Index 4: Foreground / Overlay (Remains sharp)
+                // Z-Index 3: Foreground / Overlay
                 offCtx.drawImage(overlayImage, 0, 0, offCanvas.width, offCanvas.height);
 
                 // Format filename: "1.jpg" -> "1 With filter.png"
@@ -209,9 +204,7 @@ function showMainPreview(file) {
         img.onload = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // --- APPLY BLUR TO BOTTOM LAYERS ---
-            // Matches the value in processSingleImage
-            ctx.filter = 'blur(2px)';
+            // --- THE 3-LAYER STACK (For Preview) ---
             
             // Z-Index 1
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -222,10 +215,7 @@ function showMainPreview(file) {
             const y = (canvas.height / 2) - (img.height / 2) * scale;
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
             
-            // --- REMOVE BLUR FOR THE OVERLAY ---
-            ctx.filter = 'none';
-            
-            // Z-Index 4 (Remains sharp)
+            // Z-Index 3
             ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
         };
         img.src = event.target.result;
