@@ -23,7 +23,7 @@ let downloadAction = null;
 
 // --- Load Static Layers (Z-index 1 & 3) ---
 const backgroundImage = new Image();
-backgroundImage.src = 'Background Layer.jpg'; // Matches your attached background filename
+backgroundImage.src = 'Background Layer.jpeg'; // Matches your attached background filename
 
 const overlayImage = new Image();
 // NOTE: For the layers underneath to show, this MUST be a PNG with transparency.
