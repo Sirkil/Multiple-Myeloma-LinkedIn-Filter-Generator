@@ -23,7 +23,7 @@ let downloadAction = null;
 
 // --- Load Static Layers (Z-index 1 & 3) ---
 const backgroundImage = new Image();
-backgroundImage.src = 'Background Layer.jpeg'; // Ensure this matches your folder filename
+backgroundImage.src = 'Background Layer.jpg'; // Matches your attached background filename
 
 const overlayImage = new Image();
 // NOTE: For the layers underneath to show, this MUST be a PNG with transparency.
@@ -166,16 +166,24 @@ function processSingleImage(file) {
                 // Z-Index 1: Background Layer
                 offCtx.drawImage(backgroundImage, 0, 0, offCanvas.width, offCanvas.height);
 
-                // Z-Index 2: User Image (Object-fit: cover scaling)
-                const scale = Math.max(offCanvas.width / userImage.width, offCanvas.height / userImage.height);
-                const x = (offCanvas.width / 2) - (userImage.width / 2) * scale;
-                const y = (offCanvas.height / 2) - (userImage.height / 2) * scale;
-                offCtx.drawImage(userImage, x, y, userImage.width * scale, userImage.height * scale);
+                // Z-Index 2: User Image (Fitted to top area with blur)
+                const visibleHeight = offCanvas.height * 0.75; // Targets the area above the white rectangle
+                
+                const scale = Math.max(offCanvas.width / userImage.width, visibleHeight / userImage.height);
+                const scaledWidth = userImage.width * scale;
+                const scaledHeight = userImage.height * scale;
+                
+                const x = (offCanvas.width / 2) - (scaledWidth / 2);
+                const y = (visibleHeight / 2) - (scaledHeight / 2);
+
+                offCtx.filter = 'blur(12px)'; // Adjust this number for more or less blur
+                offCtx.drawImage(userImage, x, y, scaledWidth, scaledHeight);
+                offCtx.filter = 'none'; // Reset filter so foreground isn't blurred
 
                 // Z-Index 3: Foreground / Overlay
                 offCtx.drawImage(overlayImage, 0, 0, offCanvas.width, offCanvas.height);
 
-                // Format filename: "1.jpg" -> "1 With filter.png"
+                // Format filename
                 const originalName = file.name;
                 const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
                 const newFileName = `${nameWithoutExt} With filter.png`; 
@@ -183,7 +191,7 @@ function processSingleImage(file) {
                 offCanvas.toBlob((blob) => {
                     resolve({
                         blob: blob,
-                        dataUrl: offCanvas.toDataURL('image/png', 0.9), // Added 0.9 compression for faster generation
+                        dataUrl: offCanvas.toDataURL('image/png', 0.9), 
                         filename: newFileName
                     });
                 }, 'image/png');
@@ -210,10 +218,18 @@ function showMainPreview(file) {
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
             
             // Z-Index 2
-            const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-            const x = (canvas.width / 2) - (img.width / 2) * scale;
-            const y = (canvas.height / 2) - (img.height / 2) * scale;
-            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            const visibleHeight = canvas.height * 0.75; // Targets the area above the white rectangle
+            
+            const scale = Math.max(canvas.width / img.width, visibleHeight / img.height);
+            const scaledWidth = img.width * scale;
+            const scaledHeight = img.height * scale;
+            
+            const x = (canvas.width / 2) - (scaledWidth / 2);
+            const y = (visibleHeight / 2) - (scaledHeight / 2);
+
+            ctx.filter = 'blur(8px)'; // Adjust this number for more or less blur
+            ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+            ctx.filter = 'none'; // Reset filter so foreground isn't blurred
             
             // Z-Index 3
             ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
