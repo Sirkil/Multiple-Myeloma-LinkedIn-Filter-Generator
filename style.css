@@ -1,0 +1,237 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f9; 
+    color: #333;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    padding: 40px;
+    max-width: 650px;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Brand Logo Styling */
+.brand-logo {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+h1 {
+    font-size: 22px;
+    margin: 0 0 10px 0;
+    color: #3a0808; /* Darkest burgundy for primary text */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.subtitle {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 30px;
+    font-size: 15px;
+}
+
+/* Drop Zone */
+.upload-zone {
+    border: 2px dashed #931818; /* Primary Red */
+    border-radius: 8px;
+    padding: 40px 20px;
+    background-color: #fdfdfd;
+    margin-bottom: 25px;
+    transition: background-color 0.3s;
+}
+
+.upload-zone.dragover {
+    background-color: #f9ebeb; /* Very light red tint for hover */
+}
+
+.upload-icon { margin-bottom: 15px; }
+
+.drop-text {
+    font-size: 16px;
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.browse-link {
+    color: #931818; /* Primary Red */
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+.browse-link:hover { text-decoration: underline; color: #bf262e; }
+
+.sub-text {
+    color: #888;
+    font-size: 13px;
+    margin: 0 0 20px 0;
+}
+
+.status-badge {
+    display: inline-block;
+    background-color: #f4f4f4;
+    border: 1px solid #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #555;
+    font-weight: 500;
+}
+
+/* --- Drop Zone Thumbnails --- */
+.drop-zone-thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.drop-zone-thumb {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background-color: #fff;
+}
+
+/* Buttons using your custom palette */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: white;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none !important;
+}
+
+/* Secondary Action (Upload) */
+.btn-secondary { background-color: #501719; }
+.btn-secondary:not(:disabled):hover { background-color: #3a0808; }
+
+/* Primary Action (Create) */
+.btn-primary {
+    background-color: #931818;
+    box-shadow: 0 4px 15px rgba(147, 24, 24, 0.3);
+}
+.btn-primary:not(:disabled):hover { background-color: #bf262e; } /* Brightest red on hover */
+
+/* Download Action */
+.btn-dark {
+    background-color: #3a0808;
+    width: 100%;
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.btn-dark:hover { background-color: #501719; }
+
+/* Loading Box */
+.loading-box {
+    background-color: #f9ebeb; /* Light red tint */
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+.loading-box h3 { margin: 0 0 10px 0; color: #3a0808; font-size: 18px; }
+.loading-box p { margin: 0; color: #555; font-size: 14px; }
+
+/* Spinner using brand colors */
+.spinner {
+    width: 35px;
+    height: 35px;
+    border: 4px solid #e8dada;
+    border-top: 4px solid #931818;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 15px auto;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Preview Section */
+.preview-section h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #3a0808;
+}
+
+.main-preview canvas {
+    max-width: 100%;
+    width: 320px; 
+    height: auto;
+    border-radius: 50%; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+}
+
+.thumbnail-gallery {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.thumb {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+.thumb.active {
+    border-color: #931818; /* Active border color */
+    opacity: 1;
+}
+.thumb:hover { opacity: 1; }
+
+.preview-caption {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.download-btn { margin-bottom: 12px; }
+#downloadTitle { font-size: 15px; letter-spacing: 0.5px; }
+#downloadSub { font-size: 12px; font-weight: normal; opacity: 0.9; margin-top: 4px;}
+
+.footer-note {
+    font-size: 11px;
+    color: #888;
+    margin: 0;
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Myeloma LinkedIn Filter Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/jpeg" href="Myeloma Logo.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    
+    <div class="container">
+        <img src="Myeloma Logo.png" alt="Multiple Myeloma Awareness" class="brand-logo">
+        
+        <h1>Multiple Myeloma LinkedIn Filter Generator</h1>
+        <p class="subtitle">Upload Your Image to Add the Filter.</p>
+
+        <div class="upload-zone" id="dropZone">
+            <div class="upload-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#931818" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <p class="drop-text">Drop your images here or <span class="browse-link" id="browseLink">browse</span>.</p>
+            <p class="sub-text">Supported formats: JPG, PNG, WEBP (Multiple images allowed)</p>
+            <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/webp" multiple hidden>
+            
+            <div id="dropZoneThumbnails" class="drop-zone-thumbnails"></div>
+
+            <div class="status-badge" id="uploadStatus">STATUS: 0 images uploaded</div>
+        </div>
+
+        <div class="action-buttons">
+            <button id="uploadBtn" class="btn btn-secondary">UPLOAD IMAGES</button>
+            <button id="createBtn" class="btn btn-primary" disabled>CREATE IMAGES</button>
+        </div>
+
+        <div class="loading-box" id="loadingIndicator" style="display: none;">
+            <h3>CREATING...</h3>
+            <div class="spinner"></div>
+            <p>Processing images... Please wait.</p>
+        </div>
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <h2>PREVIEW & DOWNLOAD</h2>
+            
+            <div class="main-preview">
+                <canvas id="resultCanvas" width="800" height="800"></canvas>
+            </div>
+            
+            <div class="thumbnail-gallery" id="thumbnailGallery"></div>
+            <p class="preview-caption" id="previewCaption">PREVIEW: First image with filter</p>
+
+            <button id="downloadBtn" class="btn btn-dark download-btn">
+                <span id="downloadTitle">DOWNLOAD ZIP ARCHIVE</span>
+                <span class="download-sub" id="downloadSub">(generated Images with LinkedIn filter.zip)</span>
+            </button>
+            <p class="footer-note">For multiple uploads, dynamic filenames like '1 With filter.png' are included in the ZIP.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
