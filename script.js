@@ -163,7 +163,7 @@ function processSingleImage(file) {
 
                 // --- APPLY BLUR TO BOTTOM LAYERS ---
                 // Adjust this value to change blur strength
-                offCtx.filter = 'blur(5px)'; 
+                offCtx.filter = 'blur(2px)'; 
 
                 // Z-Index 1: Background Layer
                 offCtx.drawImage(backgroundImage, 0, 0, offCanvas.width, offCanvas.height);
@@ -211,7 +211,7 @@ function showMainPreview(file) {
             
             // --- APPLY BLUR TO BOTTOM LAYERS ---
             // Matches the value in processSingleImage
-            ctx.filter = 'blur(5px)';
+            ctx.filter = 'blur(2px)';
             
             // Z-Index 1
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
