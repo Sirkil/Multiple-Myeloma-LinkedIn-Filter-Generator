@@ -191,7 +191,7 @@ h1 {
     max-width: 100%;
     width: 320px; 
     height: auto;
-    border-radius: 50%; 
+    border-radius: 50%; /* Changed to a perfect circle */
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     margin-bottom: 20px;
 }

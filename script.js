@@ -27,7 +27,7 @@ backgroundImage.src = 'Background Layer.jpeg'; // Ensure this matches your folde
 
 const overlayImage = new Image();
 // NOTE: For the layers underneath to show, this MUST be a PNG with transparency.
-overlayImage.src = 'Forground Layer.png'; 
+overlayImage.src = 'Forground Layer_V2.png'; 
 
 // --- Upload & Drag/Drop Logic ---
 const triggerUpload = () => imageUpload.click();
@@ -157,23 +157,56 @@ function processSingleImage(file) {
             const userImage = new Image();
             userImage.onload = () => {
                 const offCanvas = document.createElement('canvas');
-                offCanvas.width = 800; // Filter resolution
-                offCanvas.height = 800;
+                offCanvas.width = 1080; // Final resolution
+                offCanvas.height = 1080;
                 const offCtx = offCanvas.getContext('2d');
+
+                // Define circle parameters once
+                const centerX = offCanvas.width / 2;
+                const centerY = offCanvas.height / 2;
+                const radius = offCanvas.width / 2;
+
+                // --- MAKE ENTIRE CANVAS CIRCULAR ---
+                offCtx.beginPath();
+                offCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                offCtx.closePath();
+                offCtx.clip();
 
                 // --- THE 3-LAYER STACK ---
                 
                 // Z-Index 1: Background Layer
                 offCtx.drawImage(backgroundImage, 0, 0, offCanvas.width, offCanvas.height);
 
-                // Z-Index 2: User Image (Object-fit: cover scaling)
-                const scale = Math.max(offCanvas.width / userImage.width, offCanvas.height / userImage.height);
-                const x = (offCanvas.width / 2) - (userImage.width / 2) * scale;
-                const y = (offCanvas.height / 2) - (userImage.height / 2) * scale;
+                // Z-Index 2: User Image (Restricted STRICTLY to 1080x815 area)
+                offCtx.save(); // Save state before clipping the rectangle
+                offCtx.beginPath();
+                offCtx.rect(0, 0, 1080, 815); // Define the exact box
+                offCtx.clip(); // Apply the box clip
+
+                const targetWidth = 1080;
+                const targetHeight = 815;
+                const scale = Math.max(targetWidth / userImage.width, targetHeight / userImage.height);
+                
+                // Center the image within the top 815px
+                const x = (targetWidth / 2) - (userImage.width / 2) * scale;
+                const y = (targetHeight / 2) - (userImage.height / 2) * scale;
+
+                // Apply BOTH Blur and Grayscale filters
+                offCtx.filter = 'blur(6px) grayscale(100%)';
                 offCtx.drawImage(userImage, x, y, userImage.width * scale, userImage.height * scale);
+                
+                // Restore removes the 1080x815 clip and the filter automatically
+                offCtx.restore(); 
 
                 // Z-Index 3: Foreground / Overlay
                 offCtx.drawImage(overlayImage, 0, 0, offCanvas.width, offCanvas.height);
+
+                // --- DRAW BORDER ---
+                offCtx.strokeStyle = 'black'; // Set border color to black
+                offCtx.lineWidth = 4; // Adjust thickness here
+                offCtx.beginPath();
+                offCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                offCtx.stroke(); // Draw the stroke
 
                 // Format filename: "1.jpg" -> "1 With filter.png"
                 const originalName = file.name;
@@ -183,7 +216,7 @@ function processSingleImage(file) {
                 offCanvas.toBlob((blob) => {
                     resolve({
                         blob: blob,
-                        dataUrl: offCanvas.toDataURL('image/png', 0.9), // Added 0.9 compression for faster generation
+                        dataUrl: offCanvas.toDataURL('image/png', 0.9), 
                         filename: newFileName
                     });
                 }, 'image/png');
@@ -204,19 +237,56 @@ function showMainPreview(file) {
         img.onload = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // Define circle parameters for preview
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2;
+
+            // Save the context state before applying the circle clip
+            ctx.save();
+            
+            // --- MAKE PREVIEW CIRCULAR ---
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            
             // --- THE 3-LAYER STACK (For Preview) ---
             
             // Z-Index 1
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
             
-            // Z-Index 2
-            const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
-            const x = (canvas.width / 2) - (img.width / 2) * scale;
-            const y = (canvas.height / 2) - (img.height / 2) * scale;
+            // Z-Index 2 (Restricted STRICTLY to 1080x815 area)
+            ctx.save(); // Save state before clipping the rectangle
+            ctx.beginPath();
+            ctx.rect(0, 0, 1080, 815);
+            ctx.clip();
+
+            const targetWidth = 1080;
+            const targetHeight = 815;
+            const scale = Math.max(targetWidth / img.width, targetHeight / img.height);
+            const x = (targetWidth / 2) - (img.width / 2) * scale;
+            const y = (targetHeight / 2) - (img.height / 2) * scale;
+            
+            // Apply BOTH Blur and Grayscale filters
+            ctx.filter = 'blur(6px) grayscale(100%)';
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            
+            // Restore removes the 1080x815 clip and the filter automatically
+            ctx.restore(); 
             
             // Z-Index 3
             ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
+            
+            // --- DRAW BORDER (For Preview) ---
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 4; // Using same thickness as download
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Restore the context state so the next clearRect works properly
+            ctx.restore();
         };
         img.src = event.target.result;
     };
