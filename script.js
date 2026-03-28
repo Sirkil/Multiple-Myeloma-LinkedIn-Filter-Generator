@@ -27,7 +27,7 @@ backgroundImage.src = 'Background Layer.jpeg'; // Ensure this matches your folde
 
 const overlayImage = new Image();
 // NOTE: For the layers underneath to show, this MUST be a PNG with transparency.
-overlayImage.src = 'Forground Layer_Updated.png'; 
+overlayImage.src = 'Forground Layer_UpdatedV2.png'; 
 
 // --- Upload & Drag/Drop Logic ---
 const triggerUpload = () => imageUpload.click();
@@ -178,7 +178,7 @@ function processSingleImage(file) {
                 const x = (targetWidth / 2) - (userImage.width / 2) * scale;
                 const y = (targetHeight / 2) - (userImage.height / 2) * scale;
 
-                offCtx.filter = 'blur(10px) grayscale(100%)';
+                offCtx.filter = 'blur(10px) grayscale(70%)';
                 offCtx.drawImage(userImage, x, y, userImage.width * scale, userImage.height * scale);
                 offCtx.restore(); 
 
@@ -229,7 +229,7 @@ function showMainPreview(file) {
             const x = (targetWidth / 2) - (img.width / 2) * imgScale;
             const y = (targetHeight / 2) - (img.height / 2) * imgScale;
             
-            ctx.filter = 'blur(10px) grayscale(100%)';
+            ctx.filter = 'blur(10px) grayscale(70%)';
             ctx.drawImage(img, x, y, img.width * imgScale, img.height * imgScale);
             ctx.restore(); 
             
