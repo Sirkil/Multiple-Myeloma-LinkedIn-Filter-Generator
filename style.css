@@ -31,7 +31,7 @@ body {
 h1 {
     font-size: 22px;
     margin: 0 0 10px 0;
-    color: #3a0808; /* Darkest burgundy for primary text */
+    color: #3a0808;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -45,7 +45,7 @@ h1 {
 
 /* Drop Zone */
 .upload-zone {
-    border: 2px dashed #931818; /* Primary Red */
+    border: 2px dashed #931818;
     border-radius: 8px;
     padding: 40px 20px;
     background-color: #fdfdfd;
@@ -54,7 +54,7 @@ h1 {
 }
 
 .upload-zone.dragover {
-    background-color: #f9ebeb; /* Very light red tint for hover */
+    background-color: #f9ebeb;
 }
 
 .upload-icon { margin-bottom: 15px; }
@@ -66,7 +66,7 @@ h1 {
 }
 
 .browse-link {
-    color: #931818; /* Primary Red */
+    color: #931818;
     text-decoration: none;
     cursor: pointer;
     font-weight: 600;
@@ -134,18 +134,15 @@ h1 {
     box-shadow: none !important;
 }
 
-/* Secondary Action (Upload) */
 .btn-secondary { background-color: #501719; }
 .btn-secondary:not(:disabled):hover { background-color: #3a0808; }
 
-/* Primary Action (Create) */
 .btn-primary {
     background-color: #931818;
     box-shadow: 0 4px 15px rgba(147, 24, 24, 0.3);
 }
-.btn-primary:not(:disabled):hover { background-color: #bf262e; } /* Brightest red on hover */
+.btn-primary:not(:disabled):hover { background-color: #bf262e; }
 
-/* Download Action */
 .btn-dark {
     background-color: #3a0808;
     width: 100%;
@@ -160,7 +157,7 @@ h1 {
 
 /* Loading Box */
 .loading-box {
-    background-color: #f9ebeb; /* Light red tint */
+    background-color: #f9ebeb;
     border-radius: 8px;
     padding: 25px;
     margin-bottom: 30px;
@@ -168,7 +165,6 @@ h1 {
 .loading-box h3 { margin: 0 0 10px 0; color: #3a0808; font-size: 18px; }
 .loading-box p { margin: 0; color: #555; font-size: 14px; }
 
-/* Spinner using brand colors */
 .spinner {
     width: 35px;
     height: 35px;
@@ -191,7 +187,7 @@ h1 {
     max-width: 100%;
     width: 320px; 
     height: auto;
-    border-radius: 50%; /* Changed to a perfect circle */
+    border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     margin-bottom: 20px;
 }
@@ -215,7 +211,7 @@ h1 {
     transition: all 0.2s;
 }
 .thumb.active {
-    border-color: #931818; /* Active border color */
+    border-color: #931818;
     opacity: 1;
 }
 .thumb:hover { opacity: 1; }
