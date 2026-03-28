@@ -27,7 +27,7 @@ backgroundImage.src = 'Background Layer.jpeg'; // Ensure this matches your folde
 
 const overlayImage = new Image();
 // NOTE: For the layers underneath to show, this MUST be a PNG with transparency.
-overlayImage.src = 'Forground Layer_UpdatedV2.png'; 
+overlayImage.src = 'Forground Layer_UpdatedV4.png'; 
 
 // --- Upload & Drag/Drop Logic ---
 const triggerUpload = () => imageUpload.click();
