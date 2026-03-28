@@ -164,7 +164,7 @@ function processSingleImage(file) {
                 // Z-Index 1: Background Layer
                 offCtx.drawImage(backgroundImage, 0, 0, offCanvas.width, offCanvas.height);
 
-                // Z-Index 2: User Image (Restricted STRICTLY to 1080x900 area so it doesn't bleed behind the banner)
+                // Z-Index 2: User Image (Restricted STRICTLY to 1080x900 area)
                 offCtx.save(); 
                 offCtx.beginPath();
                 offCtx.rect(0, 0, 1080, 900); 
@@ -172,7 +172,8 @@ function processSingleImage(file) {
 
                 const targetWidth = 1080;
                 const targetHeight = 900; 
-                const scale = Math.max(targetWidth / userImage.width, targetHeight / userImage.height);
+                // Changed Math.max to Math.min so the image is CONTAINED entirely within the space
+                const scale = Math.min(targetWidth / userImage.width, targetHeight / userImage.height);
                 
                 const x = (targetWidth / 2) - (userImage.width / 2) * scale;
                 const y = (targetHeight / 2) - (userImage.height / 2) * scale;
@@ -223,7 +224,8 @@ function showMainPreview(file) {
 
             const targetWidth = 1080;
             const targetHeight = 900; 
-            const imgScale = Math.max(targetWidth / img.width, targetHeight / img.height);
+            // Changed Math.max to Math.min so the image is CONTAINED entirely within the space
+            const imgScale = Math.min(targetWidth / img.width, targetHeight / img.height);
             const x = (targetWidth / 2) - (img.width / 2) * imgScale;
             const y = (targetHeight / 2) - (img.height / 2) * imgScale;
             
