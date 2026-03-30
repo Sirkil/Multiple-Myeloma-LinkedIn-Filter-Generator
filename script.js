@@ -21,15 +21,17 @@ const downloadSub = document.getElementById('downloadSub');
 let selectedFiles = [];
 let downloadAction = null;
 
-// --- Load Static Layers (Z-index 1 & 3) ---
+// Detect Safari
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+// Load images
 const backgroundImage = new Image();
-backgroundImage.src = 'Background Layer.jpeg'; // Ensure this matches your folder filename
+backgroundImage.src = 'Background Layer.jpeg';
 
 const overlayImage = new Image();
-// NOTE: For the layers underneath to show, this MUST be a PNG with transparency.
-overlayImage.src = 'Forground Layer_UpdatedV4.png'; 
+overlayImage.src = 'Forground Layer_UpdatedV4.png';
 
-// --- Upload & Drag/Drop Logic ---
+// Upload triggers
 const triggerUpload = () => imageUpload.click();
 browseLink.addEventListener('click', triggerUpload);
 uploadBtn.addEventListener('click', triggerUpload);
@@ -49,258 +51,204 @@ dropZone.addEventListener('drop', (e) => {
     handleFiles(e.dataTransfer.files);
 });
 
-// Process selected files
 function handleFiles(files) {
     if (files.length === 0) return;
-    
+
     selectedFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-    
+
     if (selectedFiles.length === 0) {
         uploadStatus.textContent = "STATUS: Invalid file type";
-        dropZoneThumbnails.innerHTML = ''; 
         return;
     }
 
     uploadStatus.textContent = `STATUS: ${selectedFiles.length} image(s) uploaded`;
-    createBtn.disabled = false; 
-    
+    createBtn.disabled = false;
+
     previewSection.style.display = 'none';
-    thumbnailGallery.innerHTML = ''; 
-    dropZoneThumbnails.innerHTML = ''; 
-    
+    thumbnailGallery.innerHTML = '';
+    dropZoneThumbnails.innerHTML = '';
+
     selectedFiles.forEach(file => {
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = document.createElement('img');
             img.src = event.target.result;
             img.className = 'drop-zone-thumb';
-            img.title = file.name; 
             dropZoneThumbnails.appendChild(img);
         };
         reader.readAsDataURL(file);
     });
 }
 
-// --- Image Creation Logic ---
-createBtn.addEventListener('click', async function() {
+// 🔥 SAFE BLUR FUNCTION (Safari-proof)
+function applyBlur(ctx, canvas, img, w, h) {
+    ctx.drawImage(img, 0, 0, w, h);
+
+    if (!isSafari && 'filter' in ctx) {
+        ctx.filter = 'blur(10px) grayscale(70%)';
+        ctx.drawImage(canvas, 0, 0);
+        ctx.filter = 'none';
+    } else {
+        // StackBlur fallback
+        if (window.StackBlur) {
+            StackBlur.canvasRGBA(canvas, 0, 0, w, h, 10);
+        } else {
+            // fallback fallback (manual)
+            ctx.globalAlpha = 0.15;
+            for (let i = -5; i <= 5; i++) {
+                for (let j = -5; j <= 5; j++) {
+                    ctx.drawImage(canvas, i, j);
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+    }
+}
+
+// Process Image
+function processSingleImage(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const userImage = new Image();
+
+            userImage.onload = () => {
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = 1080;
+                offCanvas.height = 1080;
+                const offCtx = offCanvas.getContext('2d');
+
+                // Background
+                offCtx.drawImage(backgroundImage, 0, 0, 1080, 1080);
+
+                // Clip area
+                offCtx.save();
+                offCtx.beginPath();
+                offCtx.rect(0, 0, 1080, 900);
+                offCtx.clip();
+
+                const scale = Math.min(1080 / userImage.width, 900 / userImage.height);
+                const drawWidth = userImage.width * scale;
+                const drawHeight = userImage.height * scale;
+                const x = (1080 - drawWidth) / 2;
+                const y = (900 - drawHeight) / 2;
+
+                // temp canvas
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = drawWidth;
+                tempCanvas.height = drawHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+
+                applyBlur(tempCtx, tempCanvas, userImage, drawWidth, drawHeight);
+
+                offCtx.drawImage(tempCanvas, x, y);
+                offCtx.restore();
+
+                // Overlay
+                offCtx.drawImage(overlayImage, 0, 0, 1080, 1080);
+
+                const name = file.name.split('.')[0];
+
+                offCanvas.toBlob((blob) => {
+                    resolve({
+                        blob,
+                        dataUrl: offCanvas.toDataURL(),
+                        filename: `${name} With filter.png`
+                    });
+                });
+            };
+
+            userImage.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+// Preview
+function showMainPreview(file) {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+        const img = new Image();
+
+        img.onload = () => {
+            ctx.clearRect(0, 0, 1080, 1080);
+
+            ctx.drawImage(backgroundImage, 0, 0, 1080, 1080);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, 1080, 900);
+            ctx.clip();
+
+            const scale = Math.min(1080 / img.width, 900 / img.height);
+            const w = img.width * scale;
+            const h = img.height * scale;
+            const x = (1080 - w) / 2;
+            const y = (900 - h) / 2;
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = w;
+            tempCanvas.height = h;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            applyBlur(tempCtx, tempCanvas, img, w, h);
+
+            ctx.drawImage(tempCanvas, x, y);
+            ctx.restore();
+
+            ctx.drawImage(overlayImage, 0, 0, 1080, 1080);
+        };
+
+        img.src = event.target.result;
+    };
+
+    reader.readAsDataURL(file);
+}
+
+// Buttons
+createBtn.addEventListener('click', async () => {
     if (selectedFiles.length === 0) return;
 
-    createBtn.disabled = true;
-    uploadBtn.disabled = true;
     loadingIndicator.style.display = 'block';
-    previewSection.style.display = 'none';
 
-    try {
-        if (selectedFiles.length === 1) {
-            const result = await processSingleImage(selectedFiles[0]);
-            
-            downloadTitle.textContent = "DOWNLOAD IMAGE";
-            downloadSub.textContent = `(${result.filename})`;
-            
-            downloadAction = () => {
-                const a = document.createElement('a');
-                a.href = result.dataUrl;
-                a.download = result.filename;
-                a.click();
-            };
-            
-        } else {
-            const zip = new JSZip();
-            
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const result = await processSingleImage(selectedFiles[i]);
-                zip.file(result.filename, result.blob); 
-                createThumbnail(selectedFiles[i], i === 0);
-            }
+    if (selectedFiles.length === 1) {
+        const result = await processSingleImage(selectedFiles[0]);
 
-            const zipBlob = await zip.generateAsync({ type: "blob" });
-            const zipUrl = URL.createObjectURL(zipBlob);
+        downloadAction = () => {
+            const a = document.createElement('a');
+            a.href = result.dataUrl;
+            a.download = result.filename;
+            a.click();
+        };
 
-            downloadTitle.textContent = "DOWNLOAD ZIP ARCHIVE";
-            downloadSub.textContent = "(generated Images with LinkedIn filter.zip)";
-            
-            downloadAction = () => {
-                const a = document.createElement('a');
-                a.href = zipUrl;
-                a.download = 'generated Images with LinkedIn filter.zip';
-                a.click();
-            };
+    } else {
+        const zip = new JSZip();
+
+        for (let file of selectedFiles) {
+            const result = await processSingleImage(file);
+            zip.file(result.filename, result.blob);
         }
 
-        showMainPreview(selectedFiles[0]);
+        const blob = await zip.generateAsync({ type: "blob" });
+        const url = URL.createObjectURL(blob);
 
-        loadingIndicator.style.display = 'none';
-        previewSection.style.display = 'block';
-        
-        createBtn.disabled = false;
-        uploadBtn.disabled = false;
-
-    } catch (error) {
-        console.error("Error:", error);
-        loadingIndicator.querySelector('p').textContent = "An error occurred. Please refresh and try again.";
-        createBtn.disabled = false;
-        uploadBtn.disabled = false;
+        downloadAction = () => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'images.zip';
+            a.click();
+        };
     }
+
+    showMainPreview(selectedFiles[0]);
+
+    loadingIndicator.style.display = 'none';
+    previewSection.style.display = 'block';
 });
 
 downloadBtn.addEventListener('click', () => {
     if (downloadAction) downloadAction();
 });
-
-// --- Helper Functions ---
-
-// Processes the image in the background, returns Blob and DataURL
-function processSingleImage(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const userImage = new Image();
-            userImage.onload = () => {
-                const offCanvas = document.createElement('canvas');
-                offCanvas.width = 1080; 
-                offCanvas.height = 1080;
-                const offCtx = offCanvas.getContext('2d');
-
-                // Z-Index 1: Background Layer
-                offCtx.drawImage(backgroundImage, 0, 0, offCanvas.width, offCanvas.height);
-
-                // Z-Index 2: User Image (Restricted STRICTLY to 1080x900 area)
-                offCtx.save(); 
-                offCtx.beginPath();
-                offCtx.rect(0, 0, 1080, 900); 
-                offCtx.clip(); 
-
-                const targetWidth = 1080;
-                const targetHeight = 900; 
-                const scale = Math.min(targetWidth / userImage.width, targetHeight / userImage.height);
-                
-                const drawWidth = userImage.width * scale;
-                const drawHeight = userImage.height * scale;
-                const x = (targetWidth / 2) - (drawWidth / 2);
-                const y = (targetHeight / 2) - (drawHeight / 2);
-
-                // --- SAFARI/iOS FIX ---
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = drawWidth;
-                tempCanvas.height = drawHeight;
-                
-                // Force Safari to render the filter by temporarily adding it to the DOM
-                tempCanvas.style.position = 'absolute';
-                tempCanvas.style.left = '-9999px'; 
-                tempCanvas.style.visibility = 'hidden';
-                document.body.appendChild(tempCanvas);
-
-                const tempCtx = tempCanvas.getContext('2d');
-                
-                // Use percentage (70%) instead of decimal (0.7) for WebKit parsing compatibility
-                tempCtx.filter = 'blur(20px) grayscale(70%)';
-                tempCtx.drawImage(userImage, 0, 0, drawWidth, drawHeight);
-
-                // Draw the pre-filtered temporary canvas onto our main working canvas
-                offCtx.drawImage(tempCanvas, x, y);
-                offCtx.restore(); 
-
-                // Cleanup: Remove the temporary canvas from the DOM
-                document.body.removeChild(tempCanvas);
-                // --------------------------
-
-                // Z-Index 3: Foreground / Overlay (Full Size)
-                offCtx.drawImage(overlayImage, 0, 0, offCanvas.width, offCanvas.height);
-
-                const originalName = file.name;
-                const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
-                const newFileName = `${nameWithoutExt} With filter.png`; 
-
-                offCanvas.toBlob((blob) => {
-                    resolve({
-                        blob: blob,
-                        dataUrl: offCanvas.toDataURL('image/png', 0.9), 
-                        filename: newFileName
-                    });
-                }, 'image/png');
-            };
-            userImage.onerror = reject;
-            userImage.src = event.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-// Renders an image to the visible preview canvas
-function showMainPreview(file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Z-Index 1: Background
-            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-            
-            // Z-Index 2: User Image
-            ctx.save(); 
-            ctx.beginPath();
-            ctx.rect(0, 0, 1080, 900); 
-            ctx.clip();
-
-            const targetWidth = 1080;
-            const targetHeight = 900; 
-            const imgScale = Math.min(targetWidth / img.width, targetHeight / img.height);
-            
-            const drawWidth = img.width * imgScale;
-            const drawHeight = img.height * imgScale;
-            const x = (targetWidth / 2) - (drawWidth / 2);
-            const y = (targetHeight / 2) - (drawHeight / 2);
-            
-            // --- SAFARI/iOS FIX ---
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = drawWidth;
-            tempCanvas.height = drawHeight;
-            
-            // Force Safari to render the filter by temporarily adding it to the DOM
-            tempCanvas.style.position = 'absolute';
-            tempCanvas.style.left = '-9999px';
-            tempCanvas.style.visibility = 'hidden';
-            document.body.appendChild(tempCanvas);
-
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            // Use percentage (70%) instead of decimal (0.7) for WebKit parsing compatibility
-            tempCtx.filter = 'blur(20px) grayscale(70%)';
-            tempCtx.drawImage(img, 0, 0, drawWidth, drawHeight);
-
-            // Draw the pre-filtered temporary canvas onto our main preview canvas
-            ctx.drawImage(tempCanvas, x, y);
-            ctx.restore(); 
-
-            // Cleanup: Remove the temporary canvas from the DOM
-            document.body.removeChild(tempCanvas);
-            // --------------------------
-            
-            // Z-Index 3: Foreground Overlay (Full Size)
-            ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
-        };
-        img.src = event.target.result;
-    };
-    reader.readAsDataURL(file);
-}
-
-// Creates small clickable thumbnails for the gallery
-function createThumbnail(file, isActive) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.className = 'thumb' + (isActive ? ' active' : '');
-        
-        img.onclick = () => {
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-            img.classList.add('active');
-            showMainPreview(file);
-        };
-        
-        thumbnailGallery.appendChild(img);
-    };
-    reader.readAsDataURL(file);
-}
