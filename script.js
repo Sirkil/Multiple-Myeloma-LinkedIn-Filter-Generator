@@ -172,14 +172,25 @@ function processSingleImage(file) {
 
                 const targetWidth = 1080;
                 const targetHeight = 900; 
-                // Changed Math.max to Math.min so the image is CONTAINED entirely within the space
                 const scale = Math.min(targetWidth / userImage.width, targetHeight / userImage.height);
                 
-                const x = (targetWidth / 2) - (userImage.width / 2) * scale;
-                const y = (targetHeight / 2) - (userImage.height / 2) * scale;
+                const drawWidth = userImage.width * scale;
+                const drawHeight = userImage.height * scale;
+                const x = (targetWidth / 2) - (drawWidth / 2);
+                const y = (targetHeight / 2) - (drawHeight / 2);
 
-                offCtx.filter = 'blur(20px) grayscale(70%)';
-                offCtx.drawImage(userImage, x, y, userImage.width * scale, userImage.height * scale);
+                // iOS/Cross-platform Fix: Render filter on a temporary off-screen canvas first
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = drawWidth;
+                tempCanvas.height = drawHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Use decimal (0.7) instead of percentage (70%)
+                tempCtx.filter = 'blur(20px) grayscale(0.7)';
+                tempCtx.drawImage(userImage, 0, 0, drawWidth, drawHeight);
+
+                // Draw the pre-filtered temporary canvas onto our main working canvas
+                offCtx.drawImage(tempCanvas, x, y);
                 offCtx.restore(); 
 
                 // Z-Index 3: Foreground / Overlay (Full Size)
@@ -224,13 +235,25 @@ function showMainPreview(file) {
 
             const targetWidth = 1080;
             const targetHeight = 900; 
-            // Changed Math.max to Math.min so the image is CONTAINED entirely within the space
             const imgScale = Math.min(targetWidth / img.width, targetHeight / img.height);
-            const x = (targetWidth / 2) - (img.width / 2) * imgScale;
-            const y = (targetHeight / 2) - (img.height / 2) * imgScale;
             
-            ctx.filter = 'blur(20px) grayscale(70%)';
-            ctx.drawImage(img, x, y, img.width * imgScale, img.height * imgScale);
+            const drawWidth = img.width * imgScale;
+            const drawHeight = img.height * imgScale;
+            const x = (targetWidth / 2) - (drawWidth / 2);
+            const y = (targetHeight / 2) - (drawHeight / 2);
+            
+            // iOS/Cross-platform Fix: Render filter on a temporary off-screen canvas first
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = drawWidth;
+            tempCanvas.height = drawHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Use decimal (0.7) instead of percentage (70%)
+            tempCtx.filter = 'blur(20px) grayscale(0.7)';
+            tempCtx.drawImage(img, 0, 0, drawWidth, drawHeight);
+
+            // Draw the pre-filtered temporary canvas onto our main preview canvas
+            ctx.drawImage(tempCanvas, x, y);
             ctx.restore(); 
             
             // Z-Index 3: Foreground Overlay (Full Size)
