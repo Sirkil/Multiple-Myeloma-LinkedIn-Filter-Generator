@@ -80,29 +80,31 @@ function handleFiles(files) {
     });
 }
 
-// 🔥 SAFE BLUR FUNCTION (Safari-proof)
 function applyBlur(ctx, canvas, img, w, h) {
+    // Draw original image
     ctx.drawImage(img, 0, 0, w, h);
 
-    if (!isSafari && 'filter' in ctx) {
-        ctx.filter = 'blur(10px) grayscale(70%)';
-        ctx.drawImage(canvas, 0, 0);
-        ctx.filter = 'none';
-    } else {
-        // StackBlur fallback
-        if (window.StackBlur) {
-            StackBlur.canvasRGBA(canvas, 0, 0, w, h, 10);
-        } else {
-            // fallback fallback (manual)
-            ctx.globalAlpha = 0.15;
-            for (let i = -5; i <= 5; i++) {
-                for (let j = -5; j <= 5; j++) {
-                    ctx.drawImage(canvas, i, j);
-                }
-            }
-            ctx.globalAlpha = 1;
-        }
+    // Apply blur (WORKS on ALL browsers including iOS)
+    StackBlur.canvasRGBA(canvas, 0, 0, w, h, 10);
+
+    // Apply grayscale manually (Safari-safe)
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const gray = 0.3 * r + 0.59 * g + 0.11 * b;
+
+        // 70% grayscale mix
+        data[i]     = r * 0.3 + gray * 0.7;
+        data[i + 1] = g * 0.3 + gray * 0.7;
+        data[i + 2] = b * 0.3 + gray * 0.7;
     }
+
+    ctx.putImageData(imageData, 0, 0);
 }
 
 // Process Image
