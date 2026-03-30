@@ -179,19 +179,30 @@ function processSingleImage(file) {
                 const x = (targetWidth / 2) - (drawWidth / 2);
                 const y = (targetHeight / 2) - (drawHeight / 2);
 
-                // iOS/Cross-platform Fix: Render filter on a temporary off-screen canvas first
+                // --- SAFARI/iOS FIX ---
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = drawWidth;
                 tempCanvas.height = drawHeight;
+                
+                // Force Safari to render the filter by temporarily adding it to the DOM
+                tempCanvas.style.position = 'absolute';
+                tempCanvas.style.left = '-9999px'; 
+                tempCanvas.style.visibility = 'hidden';
+                document.body.appendChild(tempCanvas);
+
                 const tempCtx = tempCanvas.getContext('2d');
                 
-                // Use decimal (0.7) instead of percentage (70%)
-                tempCtx.filter = 'blur(20px) grayscale(0.7)';
+                // Use percentage (70%) instead of decimal (0.7) for WebKit parsing compatibility
+                tempCtx.filter = 'blur(20px) grayscale(70%)';
                 tempCtx.drawImage(userImage, 0, 0, drawWidth, drawHeight);
 
                 // Draw the pre-filtered temporary canvas onto our main working canvas
                 offCtx.drawImage(tempCanvas, x, y);
                 offCtx.restore(); 
+
+                // Cleanup: Remove the temporary canvas from the DOM
+                document.body.removeChild(tempCanvas);
+                // --------------------------
 
                 // Z-Index 3: Foreground / Overlay (Full Size)
                 offCtx.drawImage(overlayImage, 0, 0, offCanvas.width, offCanvas.height);
@@ -242,19 +253,30 @@ function showMainPreview(file) {
             const x = (targetWidth / 2) - (drawWidth / 2);
             const y = (targetHeight / 2) - (drawHeight / 2);
             
-            // iOS/Cross-platform Fix: Render filter on a temporary off-screen canvas first
+            // --- SAFARI/iOS FIX ---
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = drawWidth;
             tempCanvas.height = drawHeight;
+            
+            // Force Safari to render the filter by temporarily adding it to the DOM
+            tempCanvas.style.position = 'absolute';
+            tempCanvas.style.left = '-9999px';
+            tempCanvas.style.visibility = 'hidden';
+            document.body.appendChild(tempCanvas);
+
             const tempCtx = tempCanvas.getContext('2d');
             
-            // Use decimal (0.7) instead of percentage (70%)
-            tempCtx.filter = 'blur(20px) grayscale(0.7)';
+            // Use percentage (70%) instead of decimal (0.7) for WebKit parsing compatibility
+            tempCtx.filter = 'blur(20px) grayscale(70%)';
             tempCtx.drawImage(img, 0, 0, drawWidth, drawHeight);
 
             // Draw the pre-filtered temporary canvas onto our main preview canvas
             ctx.drawImage(tempCanvas, x, y);
             ctx.restore(); 
+
+            // Cleanup: Remove the temporary canvas from the DOM
+            document.body.removeChild(tempCanvas);
+            // --------------------------
             
             // Z-Index 3: Foreground Overlay (Full Size)
             ctx.drawImage(overlayImage, 0, 0, canvas.width, canvas.height);
